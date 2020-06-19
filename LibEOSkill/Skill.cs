@@ -20,8 +20,8 @@ namespace LibEOSkill
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public static Dictionary<SkillModes, Type> GameSkillTypes = new Dictionary<SkillModes, Type>()
     {
-      { SkillModes.EO3, typeof(EO3Skill) },
-      { SkillModes.EO4, typeof(EO4Skill) },
+      { SkillModes.EO3, typeof(EO3EO4Skill) },
+      { SkillModes.EO4, typeof(EO3EO4Skill) },
       { SkillModes.EOU, typeof(EOUSkill) },
       { SkillModes.EO2U, typeof(EO2USkill) },
       { SkillModes.EO5, typeof(EO5Skill) },

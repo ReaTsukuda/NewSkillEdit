@@ -11,7 +11,7 @@ namespace LibEOSkill.GameSpecific
   /// <summary>
   /// A skill from EO3.
   /// </summary>
-  public class EO3Skill : Skill
+  public class EO3EO4Skill : Skill
   {
     /// <summary>
     /// The skill's type, using the types defined for EO3.
@@ -38,18 +38,20 @@ namespace LibEOSkill.GameSpecific
     /// </summary>
     public EO3SkillFlags SkillFlags { get; protected set; }
 
-    public EO3Skill() 
+    /// <summary>
+    /// For deserialization from a JSON file.
+    /// </summary>
+    public EO3EO4Skill() 
     {
       UseRequirements = new EO3UseRequirements();
       SkillFlags = new EO3SkillFlags();
     }
 
     /// <summary>
-    /// For constructing an EO3Skill by deserializing a portion of playerskilltable.
+    /// For deserialization from a binary table.
     /// </summary>
-    public EO3Skill(BinaryReader reader, int skillId, Table nameTable) : base(reader, skillId, nameTable)
+    public EO3EO4Skill(BinaryReader reader, int skillId, Table nameTable) : base(reader, skillId, nameTable)
     {
-      long sob = reader.BaseStream.Position;
       Game = SkillModes.EO3;
       MaxLevel = reader.ReadByte();
       Type = (EO3SkillTypes)reader.ReadByte();
@@ -69,6 +71,9 @@ namespace LibEOSkill.GameSpecific
       DataSections = new DataSections(reader, Game);
     }
 
+    /// <summary>
+    /// For serialization back to a binary table.
+    /// </summary>
     public override void Serialize(BinaryWriter writer)
     {
       writer.Write(MaxLevel);
@@ -638,11 +643,14 @@ namespace LibEOSkill.GameSpecific
       set => BitfieldData[15] = value;
     }
 
+    /// <summary>
+    /// For deserialization from a JSON file.
+    /// </summary>
     public EO3SkillFlags() : base() { }
 
-    public EO3SkillFlags(int bitfield) : base(bitfield)
-    {
-
-    }
+    /// <summary>
+    /// For deserialization from a binary table.
+    /// </summary>
+    public EO3SkillFlags(int bitfield) : base(bitfield) { }
   }
 }

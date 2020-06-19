@@ -78,7 +78,7 @@ namespace SkillCLI
     static void Disassemble(DisassembleOptions options)
     {
       Type gameSkillType = Skill.GameSkillTypes[options.Game];
-      var skills = new List<EO3Skill>();
+      var skills = new List<EO3EO4Skill>();
       var nameTable = new OriginTablets.Types.Table(options.NameTablePath, false);
       var gameSkillConstructorInfo = gameSkillType.GetConstructor(new[] { typeof(BinaryReader), typeof(int), typeof(Table) });
       using (var reader = new BinaryReader(new FileStream(options.FilePath, FileMode.Open)))
@@ -86,7 +86,7 @@ namespace SkillCLI
         int numberOfSkills = (int)reader.BaseStream.Length / Skill.GameSkillLengths[options.Game];
         for (int skillIndex = 0; skillIndex < numberOfSkills; skillIndex += 1)
         {
-          skills.Add(gameSkillConstructorInfo.Invoke(new object[] { reader, skillIndex, nameTable }) as EO3Skill);
+          skills.Add(gameSkillConstructorInfo.Invoke(new object[] { reader, skillIndex, nameTable }) as EO3EO4Skill);
         }
       }
       File.WriteAllLines(options.OutputPath, new string[]
@@ -100,8 +100,8 @@ namespace SkillCLI
     {
       var skills = JsonConvert.DeserializeObject(
         string.Join(string.Empty, File.ReadAllLines(options.FilePath)),
-        typeof(List<EO3Skill>)
-      ) as List<EO3Skill>;
+        typeof(List<EO3EO4Skill>)
+      ) as List<EO3EO4Skill>;
       var nameTable = new Table();
       nameTable.AddRange(skills.Select(skill => skill.Name));
       using (var writer = new BinaryWriter(new FileStream(options.FilePath, FileMode.Create)))
