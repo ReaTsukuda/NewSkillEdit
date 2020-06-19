@@ -34,19 +34,21 @@ namespace LibEOSkill
     [JsonIgnore]
     public SkillModes Game { get; protected set; }
 
+    /// <summary>
+    /// This isn't used in the code itself, but is left here for reference purposes in the outputted JSON files.
+    /// </summary>
     [JsonProperty(Order = -100)]
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0052 // Remove unread private members
     private int SkillId;
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore IDE0044 // Add readonly modifier
 
-    private string _Name;
     /// <summary>
     /// The skill's name.
     /// </summary>
     [JsonProperty(Order = -99)]
-    public string Name
-    {
-      get => _Name;
-      set => _Name = value;
-    }
+    public string Name { get; set; }
 
     /// <summary>
     /// The skill's maximum level.
@@ -143,12 +145,21 @@ namespace LibEOSkill
       { SkillModes.EON, 0x264 }
     };
 
+    /// <summary>
+    /// For serialization into a JSON file.
+    /// </summary>
     public Skill() 
     {
       DataSections = new DataSections();
     }
 
-    public Skill(BinaryReader reader, int skillId, Table nameTable)
+    /// <summary>
+    /// For deserialization from a table file.
+    /// </summary>
+    /// <param name="_">The BinaryReader that is passed to the derived class that calls this.</param>
+    /// <param name="skillId">The skill's ID internally.</param>
+    /// <param name="nameTable">A deserialized playerskillnametable.tbl.</param>
+    public Skill(BinaryReader _, int skillId, Table nameTable)
     {
       Name = nameTable[skillId];
       SkillId = skillId;
@@ -221,20 +232,10 @@ namespace LibEOSkill
       set => BitfieldData[15] = value;
     }
 
-    public TargetStatus() { }
-
     /// <summary>
-    /// 
+    /// For serialization into a JSON file.
     /// </summary>
-    /// <param name="reader"></param>
-    public TargetStatus(JsonReader reader) : base(reader)
-    {
-      reader.Read(); reader.Read(); BitfieldData[0] = (bool)reader.Value; // Dead
-      reader.Read(); reader.Read(); BitfieldData[1] = (bool)reader.Value; // InflictedEnemies
-      reader.Read(); reader.Read(); BitfieldData[4] = (bool)reader.Value; // HasBuff
-      reader.Read(); reader.Read(); BitfieldData[15] = (bool)reader.Value; // IgnoreDeath
-      reader.Read(); // Object end.
-    }
+    public TargetStatus() { }
 
     /// <summary>
     /// For deserializing from a binary table.
@@ -274,20 +275,14 @@ namespace LibEOSkill
       set => BitfieldData[2] = value;
     }
 
+    /// <summary>
+    /// For serializing into a JSON file.
+    /// </summary>
     public UsableLocation() { }
 
     /// <summary>
-    /// For deserializing from a JSON file.
+    /// For deserializing from a binary table.
     /// </summary>
-    /// <param name="reader"></param>
-    public UsableLocation(JsonReader reader) : base(reader)
-    {
-      reader.Read(); reader.Read(); BitfieldData[0] = (bool)reader.Value;
-      reader.Read(); reader.Read(); BitfieldData[1] = (bool)reader.Value;
-      reader.Read(); reader.Read(); BitfieldData[2] = (bool)reader.Value;
-      reader.Read(); // Object end.
-    }
-
     public UsableLocation(int bitfield) : base(bitfield) { }
   }
 
@@ -327,12 +322,16 @@ namespace LibEOSkill
       set => BitfieldData[2] = value;
     }
 
+    /// <summary>
+    /// For serialization into a JSON file.
+    /// </summary>
     public UseRequirements() { }
 
-    public UseRequirements(int bitfield) : base(bitfield)
-    {
-
-    }
+    /// <summary>
+    /// For deserialization from a binary table.
+    /// </summary>
+    /// <param name="bitfield"></param>
+    public UseRequirements(int bitfield) : base(bitfield) { }
   }
 
   /// <summary>
@@ -411,12 +410,15 @@ namespace LibEOSkill
       set => BitfieldData[13] = value;
     }
 
+    /// <summary>
+    /// For deserializing from a JSON file.
+    /// </summary>
     public Disables() { }
 
-    public Disables(int bitfield) : base(bitfield)
-    {
-
-    }
+    /// <summary>
+    /// For deserialization from a binary table.
+    /// </summary>
+    public Disables(int bitfield) : base(bitfield) { }
   }
 
   /// <summary>
