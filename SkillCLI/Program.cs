@@ -28,12 +28,12 @@ namespace SkillCLI
   {
     [Option('i', "inputFile",
       Required = true,
-      HelpText = "The playerskilltable.tbl file to disassemble.")]
+      HelpText = "The skill table file to disassemble.")]
     public string FilePath { get; set; }
 
     [Option('n', "nameTableFile",
       Required = true,
-      HelpText = "The playerskillnametable.tbl file associated with the input table.")]
+      HelpText = "The name table file associated with the input table.")]
     public string NameTablePath { get; set; }
 
     [Option('o', "outputFile",
@@ -49,13 +49,18 @@ namespace SkillCLI
 
     [Option('i', "inputFile",
       Required = true,
-      HelpText = "The JSON file to reassemble back into a playerskilltable.tbl.")]
+      HelpText = "The JSON file to reassemble back into a skill table.")]
     public string FilePath { get; set; }
 
-    [Option('o', "outputDirectory",
+    [Option('t', "tableFile",
       Required = true,
-      HelpText = "The directory to output the resulting files back to.")]
-    public string OutputDirectory { get; set; }
+      HelpText = "The name of the resulting skill table file.")]
+    public string TableFilePath { get; set; }
+
+    [Option('n', "nameTableFile",
+      Required = true,
+      HelpText = "The name of the resulting name table file.")]
+    public string NameTableFilePath { get; set; }
   }
 
   class Program
@@ -99,13 +104,11 @@ namespace SkillCLI
       ) as List<EO3Skill>;
       var nameTable = new Table();
       nameTable.AddRange(skills.Select(skill => skill.Name));
-      using (var writer = new BinaryWriter(new FileStream(
-        Path.Combine(options.OutputDirectory, "playerskilltable.tbl"),
-        FileMode.Create)))
+      using (var writer = new BinaryWriter(new FileStream(options.FilePath, FileMode.Create)))
       {
         foreach (var skill in skills) { skill.Serialize(writer); }
       }
-      nameTable.WriteToFile(Path.Combine(options.OutputDirectory, "playerskillnametable.tbl"), false);
+      nameTable.WriteToFile(options.NameTableFilePath, false);
     }
   }
 }
