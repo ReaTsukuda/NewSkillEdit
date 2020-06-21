@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace SkillCLI
 {
@@ -78,15 +79,15 @@ namespace SkillCLI
     static void Disassemble(DisassembleOptions options)
     {
       Type gameSkillType = Skill.GameSkillTypes[options.Game];
-      var skills = new List<EO3EO4Skill>();
-      var nameTable = new OriginTablets.Types.Table(options.NameTablePath, false);
+      var skills = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(gameSkillType));
+      var nameTable = new Table(options.NameTablePath, false);
       var gameSkillConstructorInfo = gameSkillType.GetConstructor(new[] { typeof(BinaryReader), typeof(int), typeof(Table) });
       using (var reader = new BinaryReader(new FileStream(options.FilePath, FileMode.Open)))
       {
         int numberOfSkills = (int)reader.BaseStream.Length / Skill.GameSkillLengths[options.Game];
         for (int skillIndex = 0; skillIndex < numberOfSkills; skillIndex += 1)
         {
-          skills.Add(gameSkillConstructorInfo.Invoke(new object[] { reader, skillIndex, nameTable }) as EO3EO4Skill);
+          skills.Add(gameSkillConstructorInfo.Invoke(new object[] { reader, skillIndex, nameTable }));
         }
       }
       File.WriteAllLines(options.OutputPath, new string[]
@@ -98,15 +99,16 @@ namespace SkillCLI
 
     static void Assemble(AssembleOptions options)
     {
-      var skills = JsonConvert.DeserializeObject(
+      Type gameSkillType = Skill.GameSkillTypes[options.Game];
+      Type skillListType = typeof(List<>).MakeGenericType(gameSkillType);
+      var skills = (IList)JsonConvert.DeserializeObject(
         string.Join(string.Empty, File.ReadAllLines(options.FilePath)),
-        typeof(List<EO3EO4Skill>)
-      ) as List<EO3EO4Skill>;
+        skillListType);
       var nameTable = new Table();
-      nameTable.AddRange(skills.Select(skill => skill.Name));
-      using (var writer = new BinaryWriter(new FileStream(options.FilePath, FileMode.Create)))
+      nameTable.AddRange(skills.Cast<object>().Select(skill => (skill as Skill).Name));
+      using (var writer = new BinaryWriter(new FileStream(options.TableFilePath, FileMode.Create)))
       {
-        foreach (var skill in skills) { skill.Serialize(writer); }
+        foreach (var skill in skills) { (skill as Skill).Serialize(writer); }
       }
       nameTable.WriteToFile(options.NameTableFilePath, false);
     }

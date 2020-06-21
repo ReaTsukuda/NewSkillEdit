@@ -20,8 +20,8 @@ namespace LibEOSkill
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public static Dictionary<SkillModes, Type> GameSkillTypes = new Dictionary<SkillModes, Type>()
     {
-      { SkillModes.EO3, typeof(EO3EO4Skill) },
-      { SkillModes.EO4, typeof(EO3EO4Skill) },
+      { SkillModes.EO3, typeof(EO3Skill) },
+      { SkillModes.EO4, typeof(EO4Skill) },
       { SkillModes.EOU, typeof(EOUSkill) },
       { SkillModes.EO2U, typeof(EO2USkill) },
       { SkillModes.EO5, typeof(EO5Skill) },
@@ -37,12 +37,18 @@ namespace LibEOSkill
     /// <summary>
     /// This isn't used in the code itself, but is left here for reference purposes in the outputted JSON files.
     /// </summary>
-    [JsonProperty(Order = -100)]
+    [JsonProperty(Order = -101)]
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable IDE0052 // Remove unread private members
     private int SkillId;
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore IDE0044 // Add readonly modifier
+
+    /// <summary>
+    /// The skill's type.
+    /// </summary>
+    [JsonProperty(Order = -100)]
+    public int Type { get; set; }
 
     /// <summary>
     /// The skill's name.
@@ -56,6 +62,9 @@ namespace LibEOSkill
     [JsonProperty(Order = -98)]
     public byte MaxLevel { get; set; }
 
+    [JsonProperty(Order = -98)]
+    public Bitfield UseRequirements { get; protected set; }
+
     /// <summary>
     /// The skill's targeting requirements.
     /// </summary>
@@ -66,19 +75,31 @@ namespace LibEOSkill
     /// The skill's target type, i.e. what entities it targets.
     /// </summary>
     [JsonProperty(Order = -94)]
-    public TargetTypes TargetType { get; protected set; } = TargetTypes.Single;
+    public int TargetType { get; protected set; }
 
     /// <summary>
     /// What team the skill targets.
     /// </summary>
     [JsonProperty(Order = -93)]
-    public TargetTeams TargetTeam { get; protected set; } = TargetTeams.Allies;
+    public int TargetTeam { get; protected set; }
 
     /// <summary>
     /// In what context the skill can be used.
     /// </summary>
     [JsonProperty(Order = -92)]
     public UsableLocation UsableLocation { get; protected set; }
+
+    /// <summary>
+    /// How this skill interacts with modifiers—applies a buff, applies a debuff, etc.
+    /// </summary>
+    [JsonProperty(Order = -91)]
+    public int ModifierStatus { get; set; }
+
+    /// <summary>
+    /// What type of modifier this skill works with.
+    /// </summary>
+    [JsonProperty(Order = -90)]
+    public int ModifierType { get; set; }
 
     /// <summary>
     /// What element(s) the modifier affects.
@@ -96,7 +117,7 @@ namespace LibEOSkill
     /// What this skill does with disables.
     /// </summary>
     [JsonProperty(Order = -87)]
-    public InflictionStatus InflictionStatus { get; protected set; } = InflictionStatus.None;
+    public int InflictionStatus { get; set; }
 
     /// <summary>
     /// The disables that this skill operates on.
@@ -104,33 +125,12 @@ namespace LibEOSkill
     [JsonProperty(Order = -86)]
     public Disables AssociatedDisables { get; protected set; }
 
+    public Bitfield SkillFlags { get; protected set; }
+
     /// <summary>
     /// The skill's data sections.
     /// </summary>
     public DataSections DataSections { get; protected set; }
-
-    /// <summary>
-    /// Defines the targeting type of the skill.
-    /// </summary>
-    public enum TargetTypes
-    {
-      Single = 0x01,
-      All = 0x02,
-      MultiHitRandomTarget = 0x03,
-      MultiHitOneTarget = 0x04,
-      Self = 0x0A,
-      Row = 0x10
-    }
-
-    /// <summary>
-    /// Defines what teams a skill can target.
-    /// </summary>
-    public enum TargetTeams
-    {
-      Allies = 0x01,
-      Enemies = 0x02,
-      AllCombatants = 0x03
-    }
 
     /// <summary>
     /// A lookup for how many bytes a skill consists of, by default, in all of the supported games.
@@ -148,10 +148,7 @@ namespace LibEOSkill
     /// <summary>
     /// For serialization into a JSON file.
     /// </summary>
-    public Skill() 
-    {
-      DataSections = new DataSections();
-    }
+    public Skill() { DataSections = new DataSections(); }
 
     /// <summary>
     /// For deserialization from a table file.
@@ -419,32 +416,5 @@ namespace LibEOSkill
     /// For deserialization from a binary table.
     /// </summary>
     public Disables(int bitfield) : base(bitfield) { }
-  }
-
-  /// <summary>
-  /// The types of interactions with disables a skill can have.
-  /// </summary>
-  public enum InflictionStatus
-  {
-    /// <summary>
-    /// The skill does not do anything with disables.
-    /// </summary>
-    None = 0x0,
-    /// <summary>
-    /// The skill attempts to inflict a disable.
-    /// </summary>
-    Inflicts = 0x1,
-    /// <summary>
-    /// The skill removes a disable.
-    /// </summary>
-    Cures = 0x2,
-    /// <summary>
-    /// The skill spreads the target's disables to other enemies.
-    /// </summary>
-    SpreadsToEnemies = 0x3,
-    /// <summary>
-    /// The skill attempts to transfer disables from the user to a target.
-    /// </summary>
-    Transfer = 0x4
   }
 }
